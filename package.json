@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/michelsampil/node-basic-rest-api#readme",
   "dependencies": {
-    "basic-rest-api": "file:",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.18.2"
