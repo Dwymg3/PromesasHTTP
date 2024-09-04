@@ -11,9 +11,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskDueDate = document.querySelector("#taskDueDate");
     const taskState = document.querySelector("#taskState");
     const searchBar = document.querySelector("#searchBar");
+    
+    const baseUrl = "http://localhost:3000/api/tasks";
+
 
     let editingTask = null;
     let draggedTask = null;
+
+    function obtenerBack(){
+        fetch(baseUrl)
+        .then(response => {
+            if (!response.ok) {
+                console.log('Error...')
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+
+    obtenerBack();
 
     function openModal(task = null) {
         if (task) {
