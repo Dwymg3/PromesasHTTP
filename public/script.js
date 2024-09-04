@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         //console.log(priorityClass);
         //console.log(typeof(priorityClass));
-        newTask.innerHTML = `
+        newTask.innerHTML = `         
             <h4 id="${priorityClass}"></h4>
             <h3 class="title is-5">${taskTitle.value}</h3>
             <p>${taskDescription.value || "Sin descripción"}</p>
@@ -119,8 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <p><strong>Prioridad:</strong> ${taskPriority.value}</p>
             <p><strong>Fecha límite:</strong> ${taskDueDate.value}</p>
             <div class="task-actions">
-                <button class="button is-info edit-task-button">Edit</button>
-                <button class="button is-danger delete-task-button">Delete</button>
+            <button class="button is-info edit-task-button">Edit</button>
+            <button class="button is-danger delete-task-button">Delete</button>
             </div>
         `;
 
