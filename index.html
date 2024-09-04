@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">Task Manager</h1>
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <input class="input" type="text" id="searchBar" placeholder="Search tasks...">
+                </div>
+                <div class="control">
+                    <button class="button is-info" id="searchButton">Search</button>
+                </div>
+            </div>
+            <button class="button is-primary new-task-button">Add New Task</button>
+            <button class="button is-light" id="darkModeToggle">Dark Mode</button>
+
+            <div class="columns is-mobile is-multiline" id="taskColumns">
+                <div class="column is-one-fifth" id="backlog" data-state="Backlog">
+                    <h2 class="title is-4">Backlog</h2>
+                    <div class="box" draggable="true">
+                        <h4 id="highPriority" class="priority-indicator"></h4>
+                        <h3 class="title is-5">Investigación de mercado</h3>
+                        <p>Investigar aplicaciones de finanzas personales competidoras.</p>
+                        <p><strong>Asignado a:</strong> Juan Gonzalez</p>
+                        <p><strong>Prioridad:</strong> Alta</p>
+                        <p><strong>Fecha límite:</strong> 2024-08-31</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-one-fifth" id="to-do" data-state="To Do">
+                    <h2 class="title is-4">To Do</h2>
+                    <div class="box" draggable="true">
+                        <h4 id="highPriority" class="priority-indicator"></h4>
+                        <h3 class="title is-5">Especificación de casos de uso</h3>
+                        <p>Escribir los casos de uso para la funcionalidad de seguimiento de gastos.</p>
+                        <p><strong>Asignado a:</strong> Ricardo Martínez</p>
+                        <p><strong>Prioridad:</strong> Alta</p>
+                        <p><strong>Fecha límite:</strong> 2024-09-05</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-one-fifth" id="in-progress" data-state="In Progress">
+                    <h2 class="title is-4">In Progress</h2>
+                    <div class="box" draggable="true">
+                        <h4 id="highPriority" class="priority-indicator"></h4>
+                        <h3 class="title is-5">Desarrollo del módulo de autenticación</h3>
+                        <p>Implementar el inicio de sesión y registro de usuarios con Firebase.</p>
+                        <p><strong>Asignado a:</strong> Jorge Rodríguez</p>
+                        <p><strong>Prioridad:</strong> Alta</p>
+                        <p><strong>Fecha límite:</strong> 2024-08-31</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-one-fifth" id="blocked" data-state="Blocked">
+                    <h2 class="title is-4">Blocked</h2>
+                    <div class="box" draggable="true">
+                        <h4 id="highPriority" class="priority-indicator"></h4>
+                        <h3 class="title is-5">Integración con API bancaria</h3>
+                        <p>Esperando acceso a la API de un banco para la integración de datos.</p>
+                        <p><strong>Asignado a:</strong> Alberto Fernández</p>
+                        <p><strong>Prioridad:</strong> Alta</p>
+                        <p><strong>Fecha límite:</strong> 2024-08-31</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column is-one-fifth" id="done" data-state="Done">
+                    <h2 class="title is-4">Done</h2>
+                    <div class="box" draggable="true">
+                        <h4 id="highPriority" class="priority-indicator"></h4>
+                        <h3 class="title is-5">Prototipo de la pantalla de inicio</h3>
+                        <p>Prototipo interactivo de la pantalla de inicio finalizado y aprobado.</p>
+                        <p><strong>Asignado a:</strong> Javier Rodríguez</p>
+                        <p><strong>Prioridad:</strong> Alta</p>
+                        <p><strong>Fecha límite:</strong> 2024-08-31</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+                <h2 class="title">Add/Edit Task</h2>
+                <form id="taskForm">
+                    <div class="field">
+                        <label class="label">Title</label>
+                        <div class="control">
+                            <input class="input" type="text" id="taskTitle" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Description</label>
+                        <div class="control">
+                            <textarea class="textarea" id="taskDescription"></textarea>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Assigned to</label>
+                        <div class="control">
+                            <input class="input" type="text" id="taskAssigned" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Priority</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="taskPriority">
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Due Date</label>
+                        <div class="control">
+                            <input class="input" type="date" id="taskDueDate" required>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">State</label>
+                        <div class="control">
+                            <div class="select">
+                                <select id="taskState">
+                                    <option>Backlog</option>
+                                    <option>To Do</option>
+                                    <option>In Progress</option>
+                                    <option>Blocked</option>
+                                    <option>Done</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-link" type="submit">Save Task</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-light" type="button" id="cancelTask">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close"></button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
