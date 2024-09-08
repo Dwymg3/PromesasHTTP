@@ -145,42 +145,26 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: taskDueDate.value,
             status: taskState.value
         };
-        
-        if(editingTask == null){
-            fetch(baseUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(newTaskData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Tarea creada:', data);
-                location.reload();
-                modal.classList.remove("is-active");
-                taskForm.reset();
-            })
-            .catch(error => console.log('Error al crear tarea:', error));
-        } else{
-            fetch(baseUrl, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(newTaskData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Tarea editada:', data);
-                location.reload();  
-                modal.classList.remove("is-active");
-                taskForm.reset();
-            })
-            .catch(error => console.log('Error al editar tarea:', error));
-                    
-        }
+    
+        fetch(baseUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newTaskData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Tarea creada:', data);
+    
+            obtenerBack();  
+    
+            modal.classList.remove("is-active");
+            taskForm.reset();
+        })
+        .catch(error => console.log('Error al crear tarea:', error));
     });
+    
 
     function addDragAndDropListeners(task) {
         task.addEventListener("dragstart", () => {
