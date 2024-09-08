@@ -11,30 +11,59 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskDueDate = document.querySelector("#taskDueDate");
     const taskState = document.querySelector("#taskState");
     const searchBar = document.querySelector("#searchBar");
-    
+
     const baseUrl = "http://localhost:3000/api/tasks";
 
 
     let editingTask = null;
     let draggedTask = null;
 
-    function obtenerBack(){
+    function obtenerBack() {
         fetch(baseUrl)
-        .then(response => {
-            if (!response.ok) {
-                console.log('Error...')
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.log(error);
-        })
+            .then(response => {
+                if (!response.ok) {
+                    console.log('Error')
+                }
+                return response.json();
+            })
+            .then(data => {
+                data.forEach(task => {
+                    const column = document.querySelector(`#${task.status.toLowerCase().replace(" ", "-")}`);
+
+                    const newTask = document.createElement("div");
+                    newTask.className = "box";
+                    newTask.setAttribute("data-id", task.id);
+                    newTask.draggable = true;
+
+                    let priorityClass = task.priority === "High" ? "highPriority" : task.priority === "Medium" ? "mediumPriority" : "lowPriority";
+
+                    newTask.innerHTML = `
+                        <h4 id="${priorityClass}"></h4>
+                        <h3 class="title is-5">${task.title}</h3>
+                        <p>${task.description || "Sin descripción"}</p>
+                        <p><strong>Asignado a:</strong> ${task.assignedTo}</p>
+                        <p><strong>Prioridad:</strong> ${task.priority}</p>
+                        <p><strong>Fecha límite:</strong> ${task.endDate}</p>
+                        <div class="task-actions">
+                            <button class="button is-info edit-task-button">Edit</button>
+                            <button class="button is-danger delete-task-button">Delete</button>
+                        </div>
+                    `;
+
+                    addDragAndDropListeners(newTask);
+                    addTaskActionListeners(newTask);
+
+                    column.appendChild(newTask);
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            });
     }
 
     obtenerBack();
+
+
 
     function openModal(task = null) {
         if (task) {
@@ -70,9 +99,9 @@ document.addEventListener("DOMContentLoaded", () => {
     darkModeToggle.addEventListener("click", () => {
         document.body.classList.toggle("dark-mode");
         const section = document.querySelector('.section');
-        if(section.classList.contains('dark-mode')){
+        if (section.classList.contains('dark-mode')) {
             section.classList.remove('dark-mode');
-        } else{
+        } else {
             section.classList.add('dark-mode');
         }
     });
@@ -176,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }, 0);
         });
 
-        addTaskActionListeners(task); 
+        addTaskActionListeners(task);
     }
 
     function setupColumns() {
