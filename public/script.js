@@ -11,9 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskDueDate = document.querySelector("#taskDueDate");
     const taskState = document.querySelector("#taskState");
     const searchBar = document.querySelector("#searchBar");
-
     const baseUrl = "http://localhost:3000/api/tasks";
-
 
     let editingTask = null;
     let draggedTask = null;
@@ -52,18 +50,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     addDragAndDropListeners(newTask);
                     addTaskActionListeners(newTask);
-
+                    
                     column.appendChild(newTask);
+                    
                 });
             })
             .catch(error => {
                 console.log(error);
+
             });
     }
 
     obtenerBack();
 
-
+    function isDateValid(date) {
+        const fechaActual = new Date();
+        const [añoA, mesA, diaA] = [parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()) + 1, parseInt(fechaActual.getDate())];
+        const separado = date.split("-");
+        const [añoD, mesD, diaD] = [parseInt(separado[0]), parseInt(separado[1]), parseInt(separado[2])];
+        if (añoD === añoA || añoD > añoA) {
+            if (mesD === mesA || mesD > mesA) {
+                if (diaD === diaA || diaD > diaA) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
     function openModal(task = null) {
         if (task) {
@@ -106,86 +124,62 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    function isDateValid(date) {
-        const fechaActual = new Date();
-        const [añoA, mesA, diaA] = [parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()) + 1, parseInt(fechaActual.getDate())];
-        const separado = date.split("-");
-        const [añoD, mesD, diaD] = [parseInt(separado[0]), parseInt(separado[1]), parseInt(separado[2])];
-        if (añoD === añoA || añoD > añoA) {
-            if (mesD === mesA || mesD > mesA) {
-                if (diaD === diaA || diaD > diaA) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-
+    
         if (!taskTitle.value || !taskDueDate.value || !taskState.value) {
-            alert("Please fill out all required fields.");
+            alert("Por favor, completa todos los campos.");
             return;
         }
-
+    
         if (!isDateValid(taskDueDate.value)) {
-            alert("Fecha invalida. La fecha ingresada es de un dia anterior al actual");
+            alert("Fecha inválida. La fecha ingresada es de un día anterior al actual");
             return;
         }
-
-        const state = taskState.value.toLowerCase().replace(" ", "-");
-        const column = document.querySelector(`#${state}`);
-
-        if (!column) {
-            console.error(`Column with ID ${state} not found.`);
-            return;
+    
+        const newTaskData = {
+            title: taskTitle.value,
+            description: taskDescription.value || "Sin descripción",
+            assignedTo: taskAssigned.value,
+            priority: taskPriority.value,
+            endDate: taskDueDate.value,
+            status: taskState.value
+        };
+        
+        if(editingTask == null){
+            fetch(baseUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newTaskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tarea creada:', data);
+                location.reload();
+                modal.classList.remove("is-active");
+                taskForm.reset();
+            })
+            .catch(error => console.log('Error al crear tarea:', error));
+        } else{
+            fetch(baseUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newTaskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tarea editada:', data);
+                location.reload();  
+                modal.classList.remove("is-active");
+                taskForm.reset();
+            })
+            .catch(error => console.log('Error al editar tarea:', error));
+                    
         }
-
-        const newTask = document.createElement("div");
-        newTask.className = "box";
-        newTask.draggable = true;
-
-        let priorityClass = "";
-        if (taskPriority.value === "High") {
-            priorityClass = "highPriority";
-        } else if (taskPriority.value === "Medium") {
-            priorityClass = "mediumPriority";
-        } else if (taskPriority.value === "Low") {
-            priorityClass = "lowPriority";
-        }
-        //console.log(priorityClass);
-        //console.log(typeof(priorityClass));
-        newTask.innerHTML = `         
-            <h4 id="${priorityClass}"></h4>
-            <h3 class="title is-5">${taskTitle.value}</h3>
-            <p>${taskDescription.value || "Sin descripción"}</p>
-            <p><strong>Asignado a:</strong> ${taskAssigned.value}</p>
-            <p><strong>Prioridad:</strong> ${taskPriority.value}</p>
-            <p><strong>Fecha límite:</strong> ${taskDueDate.value}</p>
-            <div class="task-actions">
-            <button class="button is-info edit-task-button">Edit</button>
-            <button class="button is-danger delete-task-button">Delete</button>
-            </div>
-        `;
-
-        addDragAndDropListeners(newTask);
-
-        if (editingTask) {
-            editingTask.replaceWith(newTask);
-            column.appendChild(newTask);
-            editingTask = null;
-        } else {
-            column.appendChild(newTask);
-        }
-
-        modal.classList.remove("is-active");
-        taskForm.reset();
     });
 
     function addDragAndDropListeners(task) {
