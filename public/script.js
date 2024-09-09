@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let draggedTask = null;
 
     function obtenerBack() {
+
+        document.querySelectorAll(".column").forEach(column => column.innerHTML = '');
+
         fetch(baseUrl)
             .then(response => {
                 if (!response.ok) {
@@ -160,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log('Tarea actualizada:', data);
                 obtenerBack(); 
                 modal.classList.remove("is-active");
-                location.reload();
+                //location.reload();
                 taskForm.reset();
                 editingTask = null;
             })
@@ -178,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 console.log('Tarea creada:', data);
                 obtenerBack();
-                location.reload();
+                //location.reload();
                 modal.classList.remove("is-active");
                 taskForm.reset();
             })
@@ -222,9 +225,26 @@ document.addEventListener("DOMContentLoaded", () => {
                 column.classList.remove("over");
                 if (draggedTask) {
                     column.appendChild(draggedTask);
+                    const newStatus = column.getAttribute("data-state");
+                    const taskId = draggedTask.getAttribute("data-id");
+
+                    fetch(`${baseUrl}/${taskId}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Estado de la tarea actualizado:', data);
+                    })
+                    .catch(error => console.log('Error al actualizar el estado:', error));
+                
                     draggedTask.classList.remove("dragging");
                     draggedTask = null;
                 }
+                
             });
         });
     }
@@ -255,21 +275,22 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleDeleteTask(event) {
         const task = event.target.closest(".box");
         const taskId = task.getAttribute("data-id"); 
-
-        if (taskId) {
+    
+        if (taskId && confirm("¿Estás seguro de que deseas eliminar esta tarea?")) {
             fetch(`${baseUrl}/${taskId}`, {
                 method: "DELETE"
             })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error al eliminar la tarea');
-                    }
-                    task.remove();
-                    console.log('Tarea eliminada');
-                })
-                .catch(error => console.log('Error:', error));
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al eliminar la tarea');
+                }
+                task.remove();
+                console.log('Tarea eliminada');
+            })
+            .catch(error => console.log('Error:', error));
         }
     }
+    
 
 
     function handleEditTask(event) {
