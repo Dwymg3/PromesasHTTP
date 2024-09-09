@@ -18,7 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function obtenerBack() {
 
-        document.querySelectorAll(".column").forEach(column => column.innerHTML = '');
+        document.querySelectorAll(".column").forEach(column => {
+            const tasks = column.querySelectorAll(".box"); 
+            tasks.forEach(task => task.remove());
+        });
 
         fetch(baseUrl)
             .then(response => {
