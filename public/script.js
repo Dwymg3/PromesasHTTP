@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (editingTask) {
 
             const taskId = editingTask.getAttribute("data-id");
-            fetch('${baseUrl}/${taskId}', {
+            fetch(`${baseUrl}/${taskId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
