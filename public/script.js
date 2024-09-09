@@ -126,17 +126,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-
+    
         if (!taskTitle.value || !taskDueDate.value || !taskState.value) {
             alert("Por favor, completa todos los campos.");
             return;
         }
-
+    
         if (!isDateValid(taskDueDate.value)) {
             alert("Fecha inválida. La fecha ingresada es de un día anterior al actual");
             return;
         }
-
+    
         const newTaskData = {
             title: taskTitle.value,
             description: taskDescription.value || "Sin descripción",
@@ -145,24 +145,43 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: taskDueDate.value,
             status: taskState.value
         };
+    if (editingTask) {
 
-        fetch(baseUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newTaskData)
-        })
+            const taskId = editingTask.getAttribute("data-id");
+            fetch('${baseUrl}/${taskId}', {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newTaskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tarea actualizada:', data);
+                obtenerBack(); 
+                modal.classList.remove("is-active");
+                taskForm.reset();
+                editingTask = null;
+            })
+            .catch(error => console.log('Error al actualizar la tarea:', error));
+        } else {
+     
+            fetch(baseUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newTaskData)
+            })
             .then(response => response.json())
             .then(data => {
                 console.log('Tarea creada:', data);
-
                 obtenerBack();
-
                 modal.classList.remove("is-active");
                 taskForm.reset();
             })
             .catch(error => console.log('Error al crear tarea:', error));
+        }
     });
 
 

@@ -63,12 +63,15 @@ router.put("/tasks/:taskId", (req, res) => {
   const taskId = req.params.taskId;
   const updatedTask = req.body;
 
+  
   tasks = tasks.map((task) => {
     if (task.id === taskId) {
       return { ...task, ...updatedTask, id: taskId };
     }
     return task;
   });
+
+  
 
   res.json(tasks.find((task) => task.id === taskId));
 });
