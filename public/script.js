@@ -50,9 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     addDragAndDropListeners(newTask);
                     addTaskActionListeners(newTask);
-                    
+
                     column.appendChild(newTask);
-                    
+
                 });
             })
             .catch(error => {
@@ -126,17 +126,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-    
+
         if (!taskTitle.value || !taskDueDate.value || !taskState.value) {
             alert("Por favor, completa todos los campos.");
             return;
         }
-    
+
         if (!isDateValid(taskDueDate.value)) {
             alert("Fecha inválida. La fecha ingresada es de un día anterior al actual");
             return;
         }
-    
+
         const newTaskData = {
             title: taskTitle.value,
             description: taskDescription.value || "Sin descripción",
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: taskDueDate.value,
             status: taskState.value
         };
-    
+
         fetch(baseUrl, {
             method: "POST",
             headers: {
@@ -153,18 +153,18 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             body: JSON.stringify(newTaskData)
         })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Tarea creada:', data);
-    
-            obtenerBack();  
-    
-            modal.classList.remove("is-active");
-            taskForm.reset();
-        })
-        .catch(error => console.log('Error al crear tarea:', error));
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tarea creada:', data);
+
+                obtenerBack();
+
+                modal.classList.remove("is-active");
+                taskForm.reset();
+            })
+            .catch(error => console.log('Error al crear tarea:', error));
     });
-    
+
 
     function addDragAndDropListeners(task) {
         task.addEventListener("dragstart", () => {
@@ -233,10 +233,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleDeleteTask(event) {
         const task = event.target.closest(".box");
-        if (task) {
-            task.remove();
+        const taskId = task.getAttribute("data-id"); 
+
+        if (taskId) {
+            fetch(`${baseUrl}/${taskId}`, {
+                method: "DELETE"
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar la tarea');
+                    }
+                    task.remove();
+                    console.log('Tarea eliminada');
+                })
+                .catch(error => console.log('Error:', error));
         }
     }
+
 
     function handleEditTask(event) {
         const task = event.target.closest(".box");
