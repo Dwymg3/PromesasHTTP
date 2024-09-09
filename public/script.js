@@ -160,6 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log('Tarea actualizada:', data);
                 obtenerBack(); 
                 modal.classList.remove("is-active");
+                location.reload();
                 taskForm.reset();
                 editingTask = null;
             })
@@ -177,6 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 console.log('Tarea creada:', data);
                 obtenerBack();
+                location.reload();
                 modal.classList.remove("is-active");
                 taskForm.reset();
             })
