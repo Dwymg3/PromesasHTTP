@@ -17,6 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let draggedTask = null;
 
     function obtenerBack() {
+
+        document.querySelectorAll(".column").forEach(column => {
+            const tasks = column.querySelectorAll(".box"); 
+            tasks.forEach(task => task.remove());
+        });
+
         fetch(baseUrl)
             .then(response => {
                 if (!response.ok) {
@@ -63,25 +69,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     obtenerBack();
 
+    // function isDateValid(date) {
+    //     const fechaActual = new Date();
+    //     const [añoA, mesA, diaA] = [parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()) + 1, parseInt(fechaActual.getDate())];
+    //     const separado = date.split("-");
+    //     const [añoD, mesD, diaD] = [parseInt(separado[0]), parseInt(separado[1]), parseInt(separado[2])];
+    //     if (añoD === añoA || añoD > añoA) {
+    //         if (mesD === mesA || mesD > mesA) {
+    //             if (diaD === diaA || diaD > diaA) {
+    //                 return true;
+    //             } else {
+    //                 return false;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
     function isDateValid(date) {
         const fechaActual = new Date();
-        const [añoA, mesA, diaA] = [parseInt(fechaActual.getFullYear()), parseInt(fechaActual.getMonth()) + 1, parseInt(fechaActual.getDate())];
-        const separado = date.split("-");
-        const [añoD, mesD, diaD] = [parseInt(separado[0]), parseInt(separado[1]), parseInt(separado[2])];
-        if (añoD === añoA || añoD > añoA) {
-            if (mesD === mesA || mesD > mesA) {
-                if (diaD === diaA || diaD > diaA) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        const fechaIngresada = new Date(date);
+        return fechaIngresada >= fechaActual;
     }
+
 
     function openModal(task = null) {
         if (task) {
@@ -89,7 +102,17 @@ document.addEventListener("DOMContentLoaded", () => {
             taskDescription.value = task.querySelector("p:nth-of-type(1)").textContent;
             taskAssigned.value = task.querySelector("p:nth-of-type(2)").textContent.replace("Asignado a: ", "");
             taskPriority.value = task.querySelector("p:nth-of-type(3)").textContent.replace("Prioridad: ", "");
-            taskDueDate.value = task.querySelector("p:nth-of-type(4)").textContent.replace("Fecha límite: ", "");
+
+            const endDate = task.querySelector("p:nth-of-type(4)").textContent.replace("Fecha límite: ", "");
+            const fechaConvertida = new Date(endDate);
+
+            if (!isNaN(fechaConvertida)) {
+                const formattedDate = fechaConvertida.toISOString().split('T')[0];
+                taskDueDate.value = formattedDate;
+            } else {
+                taskDueDate.value = "";
+            }
+
             taskState.value = task.closest(".column").getAttribute("data-state");
             editingTask = task;
         } else {
@@ -126,17 +149,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-    
+
         if (!taskTitle.value || !taskDueDate.value || !taskState.value) {
             alert("Por favor, completa todos los campos.");
             return;
         }
-    
+
         if (!isDateValid(taskDueDate.value)) {
-            alert("Fecha inválida. La fecha ingresada es de un día anterior al actual");
+            dateError.style.display = "block";
             return;
+        } else {
+            dateError.style.display = "none";
         }
-    
+
         const newTaskData = {
             title: taskTitle.value,
             description: taskDescription.value || "Sin descripción",
@@ -145,28 +170,28 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: taskDueDate.value,
             status: taskState.value
         };
-    if (editingTask) {
+        if (editingTask) {
 
             const taskId = editingTask.getAttribute("data-id");
-            fetch('${baseUrl}/${taskId}', {
+            fetch(`${baseUrl}/${taskId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(newTaskData)
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Tarea actualizada:', data);
-                obtenerBack(); 
-                modal.classList.remove("is-active");
-                location.reload();
-                taskForm.reset();
-                editingTask = null;
-            })
-            .catch(error => console.log('Error al actualizar la tarea:', error));
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Tarea actualizada:', data);
+                    obtenerBack();
+                    modal.classList.remove("is-active");
+                    //location.reload();
+                    taskForm.reset();
+                    editingTask = null;
+                })
+                .catch(error => console.log('Error al actualizar la tarea:', error));
         } else {
-     
+
             fetch(baseUrl, {
                 method: "POST",
                 headers: {
@@ -174,15 +199,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify(newTaskData)
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Tarea creada:', data);
-                obtenerBack();
-                location.reload();
-                modal.classList.remove("is-active");
-                taskForm.reset();
-            })
-            .catch(error => console.log('Error al crear tarea:', error));
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Tarea creada:', data);
+                    obtenerBack();
+                    //location.reload();
+                    modal.classList.remove("is-active");
+                    taskForm.reset();
+                })
+                .catch(error => console.log('Error al crear tarea:', error));
         }
     });
 
@@ -221,10 +246,30 @@ document.addEventListener("DOMContentLoaded", () => {
             column.addEventListener("drop", () => {
                 column.classList.remove("over");
                 if (draggedTask) {
-                    column.appendChild(draggedTask);
-                    draggedTask.classList.remove("dragging");
-                    draggedTask = null;
+                    const currentStatus = draggedTask.closest(".column").getAttribute("data-state");
+                    const newStatus = column.getAttribute("data-state");
+                    const taskId = draggedTask.getAttribute("data-id");
+
+                    if (currentStatus !== newStatus) {
+                        fetch(`${baseUrl}/${taskId}`, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Estado de la tarea actualizado:', data);
+                                obtenerBack();
+                            })
+                            .catch(error => console.log('Error al actualizar el estado:', error));
+
+                        draggedTask.classList.remove("dragging");
+                        draggedTask = null;
+                    }
                 }
+
             });
         });
     }
@@ -254,9 +299,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleDeleteTask(event) {
         const task = event.target.closest(".box");
-        const taskId = task.getAttribute("data-id"); 
+        const taskId = task.getAttribute("data-id");
 
-        if (taskId) {
+        if (taskId && confirm("¿Estás seguro de que deseas eliminar esta tarea?")) {
             fetch(`${baseUrl}/${taskId}`, {
                 method: "DELETE"
             })
@@ -266,10 +311,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     task.remove();
                     console.log('Tarea eliminada');
+                    if (modal.classList.contains("is-active")) {
+                        modal.classList.remove("is-active");
+                        editingTask = null;
+                        taskForm.reset();
+                    }
                 })
                 .catch(error => console.log('Error:', error));
         }
     }
+
 
 
     function handleEditTask(event) {

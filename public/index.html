@@ -87,7 +87,10 @@
                     <div class="field">
                         <label class="label">Due Date</label>
                         <div class="control">
-                            <input class="input" type="date" id="taskDueDate" required>
+                            <input type="date" id="taskDueDate" name="dueDate" />
+                            <span id="dateError" class="error-message" style="display: none; color: red;">Fecha
+                                inválida. La fecha ingresada debe ser hoy o posterior.</span>
+
                         </div>
                     </div>
                     <div class="field">
