@@ -23,7 +23,7 @@
     "basic-rest-api": "file:",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.21.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
